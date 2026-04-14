@@ -1,0 +1,534 @@
+### Переменные (настройте при необходимости)
+@baseUrl = http://localhost:8080
+@contentType = application/json
+
+###############################################
+# 1. Pupil (Воспитанник)
+###############################################
+
+### GET все воспитанники
+GET {{baseUrl}}/api/pupils
+
+### GET воспитанник по ID
+GET {{baseUrl}}/api/pupils/1001
+
+### POST создать воспитанника
+POST {{baseUrl}}/api/pupils
+Content-Type: {{contentType}}
+
+{
+  "personalFileNumber": 1001,
+  "fullName": "Иванов Иван Иванович",
+  "birthDate": "2010-05-15",
+  "gender": "М",
+  "mainDiagnosis": "F70.0"
+}
+
+### PUT обновить воспитанника
+PUT {{baseUrl}}/api/pupils/1001
+Content-Type: {{contentType}}
+
+{
+  "personalFileNumber": 1001,
+  "fullName": "Иванов Иван Петрович",
+  "birthDate": "2010-05-15",
+  "gender": "М",
+  "mainDiagnosis": "F71.0"
+}
+
+### DELETE удалить воспитанника
+DELETE {{baseUrl}}/api/pupils/1001
+
+
+###############################################
+# 2. Diagnosis (Диагноз)
+###############################################
+
+### GET все диагнозы
+GET {{baseUrl}}/api/diagnoses
+
+### GET диагноз по коду
+GET {{baseUrl}}/api/diagnoses/F70.0
+
+### POST создать диагноз
+POST {{baseUrl}}/api/diagnoses
+Content-Type: {{contentType}}
+
+{
+  "code": "F70.0",
+  "name": "Умственная отсталость легкой степени"
+}
+
+### PUT обновить диагноз
+PUT {{baseUrl}}/api/diagnoses/F70.0
+Content-Type: {{contentType}}
+
+{
+  "code": "F70.0",
+  "name": "Легкая умственная отсталость"
+}
+
+### DELETE удалить диагноз
+DELETE {{baseUrl}}/api/diagnoses/F70.0
+
+
+###############################################
+# 3. DiagnosisPupil (Диагноз воспитанника)
+###############################################
+
+### GET все связи диагноз-воспитанник
+GET {{baseUrl}}/api/diagnosis-pupils
+
+### GET связь по составному ключу
+GET {{baseUrl}}/api/diagnosis-pupils/F70.0/1001
+
+### POST создать связь
+POST {{baseUrl}}/api/diagnosis-pupils
+Content-Type: {{contentType}}
+
+{
+  "diagnosisCode": "F70.0",
+  "personalFileNumber": 1001
+}
+
+### DELETE удалить связь
+DELETE {{baseUrl}}/api/diagnosis-pupils/F70.0/1001
+
+
+###############################################
+# 4. Teacher (Педагог)
+###############################################
+
+### GET все педагоги
+GET {{baseUrl}}/api/teachers
+
+### GET педагог по ФИО (URL-encoded)
+GET {{baseUrl}}/api/teachers/Петрова%20Анна%20Сергеевна
+
+### POST создать педагога
+POST {{baseUrl}}/api/teachers
+Content-Type: {{contentType}}
+
+{
+  "fullName": "Петрова Анна Сергеевна",
+  "birthDate": "1985-03-20",
+  "contactInfo": "+7-999-123-45-67",
+  "position": "Учитель начальных классов"
+}
+
+### PUT обновить педагога
+PUT {{baseUrl}}/api/teachers/Петрова%20Анна%20Сергеевна
+Content-Type: {{contentType}}
+
+{
+  "fullName": "Петрова Анна Сергеевна",
+  "birthDate": "1985-03-20",
+  "contactInfo": "+7-999-123-45-67",
+  "position": "Старший учитель"
+}
+
+### DELETE удалить педагога
+DELETE {{baseUrl}}/api/teachers/Петрова%20Анна%20Сергеевна
+
+
+###############################################
+# 5. Guardian (Опекун)
+###############################################
+
+### GET все опекуны
+GET {{baseUrl}}/api/guardians
+
+### GET опекун по ФИО
+GET {{baseUrl}}/api/guardians/Сидорова%20Мария%20Ивановна
+
+### POST создать опекуна
+POST {{baseUrl}}/api/guardians
+Content-Type: {{contentType}}
+
+{
+  "fullName": "Сидорова Мария Ивановна",
+  "contactInfo": "+7-888-555-33-22",
+  "address": "г. Москва, ул. Ленина, д. 10, кв. 5",
+  "gender": "Ж",
+  "birthDate": "1975-08-12"
+}
+
+### PUT обновить опекуна
+PUT {{baseUrl}}/api/guardians/Сидорова%20Мария%20Ивановна
+Content-Type: {{contentType}}
+
+{
+  "fullName": "Сидорова Мария Ивановна",
+  "contactInfo": "+7-888-555-33-22",
+  "address": "г. Москва, ул. Пушкина, д. 5, кв. 12",
+  "gender": "Ж",
+  "birthDate": "1975-08-12"
+}
+
+### DELETE удалить опекуна
+DELETE {{baseUrl}}/api/guardians/Сидорова%20Мария%20Ивановна
+
+
+###############################################
+# 6. GuardianPupil (Опекун воспитанника)
+###############################################
+
+### GET все связи опекун-воспитанник
+GET {{baseUrl}}/api/guardian-pupils
+
+### GET связь по номеру дела воспитанника
+GET {{baseUrl}}/api/guardian-pupils/1001
+
+### POST создать связь
+POST {{baseUrl}}/api/guardian-pupils
+Content-Type: {{contentType}}
+
+{
+  "guardianFullName": "Сидорова Мария Ивановна",
+  "personalFileNumber": 1001
+}
+
+### PUT обновить связь
+PUT {{baseUrl}}/api/guardian-pupils/1001
+Content-Type: {{contentType}}
+
+{
+  "guardianFullName": "Сидорова Мария Ивановна",
+  "personalFileNumber": 1001
+}
+
+### DELETE удалить связь
+DELETE {{baseUrl}}/api/guardian-pupils/1001
+
+
+###############################################
+# 7. Program (Программа)
+###############################################
+
+### GET все программы
+GET {{baseUrl}}/api/programs
+
+### GET программа по коду
+GET {{baseUrl}}/api/programs/1
+
+### POST создать программу
+POST {{baseUrl}}/api/programs
+Content-Type: {{contentType}}
+
+{
+  "code": 1,
+  "name": "Адаптированная основная общеобразовательная программа"
+}
+
+### PUT обновить программу
+PUT {{baseUrl}}/api/programs/1
+Content-Type: {{contentType}}
+
+{
+  "code": 1,
+  "name": "АООП (вариант 1)"
+}
+
+### DELETE удалить программу
+DELETE {{baseUrl}}/api/programs/1
+
+
+###############################################
+# 8. SubjectArea (Предметная область)
+###############################################
+
+### GET все предметные области
+GET {{baseUrl}}/api/subject-areas
+
+### GET область по коду
+GET {{baseUrl}}/api/subject-areas/10
+
+### POST создать область
+POST {{baseUrl}}/api/subject-areas
+Content-Type: {{contentType}}
+
+{
+  "code": 10,
+  "name": "Язык и речевая практика"
+}
+
+### PUT обновить область
+PUT {{baseUrl}}/api/subject-areas/10
+Content-Type: {{contentType}}
+
+{
+  "code": 10,
+  "name": "Русский язык и речевая практика"
+}
+
+### DELETE удалить область
+DELETE {{baseUrl}}/api/subject-areas/10
+
+
+###############################################
+# 9. MedicalEquipment (Медоборудование)
+###############################################
+
+### GET всё оборудование
+GET {{baseUrl}}/api/medical-equipments
+
+### GET оборудование по инвентарному номеру
+GET {{baseUrl}}/api/medical-equipments/5001
+
+### POST создать оборудование
+POST {{baseUrl}}/api/medical-equipments
+Content-Type: {{contentType}}
+
+{
+  "inventoryNumber": 5001,
+  "name": "Ингалятор компрессорный",
+  "issueDate": "2023-09-01",
+  "personalFileNumber": 1001
+}
+
+### PUT обновить оборудование
+PUT {{baseUrl}}/api/medical-equipments/5001
+Content-Type: {{contentType}}
+
+{
+  "inventoryNumber": 5001,
+  "name": "Ингалятор ультразвуковой",
+  "issueDate": "2023-09-01",
+  "personalFileNumber": 1001
+}
+
+### DELETE удалить оборудование
+DELETE {{baseUrl}}/api/medical-equipments/5001
+
+
+###############################################
+# 10. IndividualProgram (Индивидуальная программа)
+###############################################
+
+### GET все индивидуальные программы
+GET {{baseUrl}}/api/individual-programs
+
+### GET по составному ключу (год/код программы)
+GET {{baseUrl}}/api/individual-programs/2024/1
+
+### POST создать индивидуальную программу
+POST {{baseUrl}}/api/individual-programs
+Content-Type: {{contentType}}
+
+{
+  "year": 2024,
+  "programCode": 1
+}
+
+### DELETE удалить индивидуальную программу
+DELETE {{baseUrl}}/api/individual-programs/2024/1
+
+
+###############################################
+# 11. PupilEducation (Обучение воспитанника)
+###############################################
+
+### GET все обучения
+GET {{baseUrl}}/api/pupil-educations
+
+### GET обучение по коду
+GET {{baseUrl}}/api/pupil-educations/3001
+
+### POST создать обучение
+POST {{baseUrl}}/api/pupil-educations
+Content-Type: {{contentType}}
+
+{
+  "code": 3001,
+  "year": 2024,
+  "programCode": 1,
+  "teacherFullName": "Петрова Анна Сергеевна",
+  "personalFileNumber": 1001
+}
+
+### PUT обновить обучение
+PUT {{baseUrl}}/api/pupil-educations/3001
+Content-Type: {{contentType}}
+
+{
+  "code": 3001,
+  "year": 2024,
+  "programCode": 1,
+  "teacherFullName": "Петрова Анна Сергеевна",
+  "personalFileNumber": 1001
+}
+
+### DELETE удалить обучение
+DELETE {{baseUrl}}/api/pupil-educations/3001
+
+
+###############################################
+# 12. Subject (Учебный предмет)
+###############################################
+
+### GET все предметы
+GET {{baseUrl}}/api/subjects
+
+### GET предмет по составному ключу (название/код области)
+GET {{baseUrl}}/api/subjects/Русский%20язык/10
+
+### POST создать предмет
+POST {{baseUrl}}/api/subjects
+Content-Type: {{contentType}}
+
+{
+  "name": "Русский язык",
+  "subjectAreaCode": 10,
+  "hours": 68,
+  "programCode": 1,
+  "year": 2024
+}
+
+### PUT обновить предмет
+PUT {{baseUrl}}/api/subjects/Русский%20язык/10
+Content-Type: {{contentType}}
+
+{
+  "name": "Русский язык",
+  "subjectAreaCode": 10,
+  "hours": 70,
+  "programCode": 1,
+  "year": 2024
+}
+
+### DELETE удалить предмет
+DELETE {{baseUrl}}/api/subjects/Русский%20язык/10
+
+
+###############################################
+# 13. SubjectResult (Результат изучения предмета)
+###############################################
+
+### GET все результаты
+GET {{baseUrl}}/api/subject-results
+
+### GET результат по составному ключу
+GET {{baseUrl}}/api/subject-results/Русский%20язык/10/3001
+
+### POST создать результат
+POST {{baseUrl}}/api/subject-results
+Content-Type: {{contentType}}
+
+{
+  "subjectName": "Русский язык",
+  "subjectAreaCode": 10,
+  "educationCode": 3001,
+  "goalDescription": "Формирование навыков чтения и письма",
+  "resultDescription": "Читает по слогам, пишет печатными буквами"
+}
+
+### PUT обновить результат
+PUT {{baseUrl}}/api/subject-results/Русский%20язык/10/3001
+Content-Type: {{contentType}}
+
+{
+  "subjectName": "Русский язык",
+  "subjectAreaCode": 10,
+  "educationCode": 3001,
+  "goalDescription": "Формирование навыков чтения и письма",
+  "resultDescription": "Читает целыми словами, пишет прописными буквами"
+}
+
+### DELETE удалить результат
+DELETE {{baseUrl}}/api/subject-results/Русский%20язык/10/3001
+
+
+###############################################
+# 14. PersonalResultType (Личностные результаты)
+###############################################
+
+### GET все личностные результаты
+GET {{baseUrl}}/api/personal-result-types
+
+### GET по коду обучения
+GET {{baseUrl}}/api/personal-result-types/3001
+
+### POST создать
+POST {{baseUrl}}/api/personal-result-types
+Content-Type: {{contentType}}
+
+{
+  "educationCode": 3001,
+  "description": "Проявляет интерес к учебной деятельности"
+}
+
+### PUT обновить
+PUT {{baseUrl}}/api/personal-result-types/3001
+Content-Type: {{contentType}}
+
+{
+  "educationCode": 3001,
+  "description": "Активно участвует в учебном процессе"
+}
+
+### DELETE удалить
+DELETE {{baseUrl}}/api/personal-result-types/3001
+
+
+###############################################
+# 15. SubjectResultType (Предметные результаты)
+###############################################
+
+### GET все предметные результаты
+GET {{baseUrl}}/api/subject-result-types
+
+### GET по коду обучения
+GET {{baseUrl}}/api/subject-result-types/3001
+
+### POST создать
+POST {{baseUrl}}/api/subject-result-types
+Content-Type: {{contentType}}
+
+{
+  "educationCode": 3001,
+  "description": "Усвоил программу по математике на базовом уровне"
+}
+
+### PUT обновить
+PUT {{baseUrl}}/api/subject-result-types/3001
+Content-Type: {{contentType}}
+
+{
+  "educationCode": 3001,
+  "description": "Усвоил программу по математике на повышенном уровне"
+}
+
+### DELETE удалить
+DELETE {{baseUrl}}/api/subject-result-types/3001
+
+
+###############################################
+# 16. BasicActionResultType (Базовые учебные действия)
+###############################################
+
+### GET все базовые действия
+GET {{baseUrl}}/api/basic-action-result-types
+
+### GET по коду обучения
+GET {{baseUrl}}/api/basic-action-result-types/3001
+
+### POST создать
+POST {{baseUrl}}/api/basic-action-result-types
+Content-Type: {{contentType}}
+
+{
+  "educationCode": 3001,
+  "description": "Умеет работать по образцу"
+}
+
+### PUT обновить
+PUT {{baseUrl}}/api/basic-action-result-types/3001
+Content-Type: {{contentType}}
+
+{
+  "educationCode": 3001,
+  "description": "Умеет самостоятельно планировать действия"
+}
+
+### DELETE удалить
+DELETE {{baseUrl}}/api/basic-action-result-types/3001
