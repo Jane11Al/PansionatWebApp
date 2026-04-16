@@ -16,6 +16,11 @@ spring:
     show-sql: true
 server:
   port: 8080
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    ru.ssau: DEBUG
 jwt:
   secret: "SuPerSecRetKeyForJWTGenerationThatShouldBeLongEnoughAtLeast256Bits"
   expiration: 86400000  # 24 часа

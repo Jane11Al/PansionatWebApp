@@ -1,534 +1,622 @@
-### Переменные (настройте при необходимости)
+### Переменные
 @baseUrl = http://localhost:8080
-@contentType = application/json
+@authToken = eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiLQmNCy0LDQvdC-0LIg0JjQstCw0L0g0JjQstCw0L3QvtCy0LjRhyIsImlhdCI6MTc3NjM3NDczMywiZXhwIjoxNzc2NDYxMTMzfQ.UykEXI9W27peEMxHCSBfcIR3tq_RGDOdNL-_oVZ3SnMiTngskgafa_CWXF4DMH-3f6eZB74KkYs7mBMaNXyNlg
+
+### Логин педагога
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "fullname": "Иванов Иван Иванович",
+  "password": "password"
+}
+
+> {% client.global.set("authToken", response.body.token); %}
 
 ###############################################
-# 1. Pupil (Воспитанник)
+# Воспитанник (Pupil)
 ###############################################
 
-### GET все воспитанники
+### Получить всех воспитанников
 GET {{baseUrl}}/api/pupils
+Authorization: Bearer {{authToken}}
 
-### GET воспитанник по ID
-GET {{baseUrl}}/api/pupils/1001
+### Получить воспитанника по ID (подставьте существующий ID)
+GET {{baseUrl}}/api/pupils/1
+Authorization: Bearer {{authToken}}
 
-### POST создать воспитанника
+### Создать воспитанника
 POST {{baseUrl}}/api/pupils
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
   "personalFileNumber": 1001,
-  "fullName": "Иванов Иван Иванович",
-  "birthDate": "2010-05-15",
+  "fullName": "Петров Петр Петрович",
+  "birthDate": "2012-03-15",
   "gender": "М",
   "mainDiagnosis": "F70.0"
 }
 
-### PUT обновить воспитанника
-PUT {{baseUrl}}/api/pupils/1001
-Content-Type: {{contentType}}
+### Обновить воспитанника (ID = 1)
+PUT {{baseUrl}}/api/pupils/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
   "personalFileNumber": 1001,
-  "fullName": "Иванов Иван Петрович",
-  "birthDate": "2010-05-15",
+  "fullName": "Петров Петр Петрович (обновлено)",
+  "birthDate": "2012-03-15",
   "gender": "М",
   "mainDiagnosis": "F71.0"
 }
 
-### DELETE удалить воспитанника
-DELETE {{baseUrl}}/api/pupils/1001
-
+### Удалить воспитанника (ID = 1)
+DELETE {{baseUrl}}/api/pupils/1
+Authorization: Bearer {{authToken}}
 
 ###############################################
-# 2. Diagnosis (Диагноз)
+# Диагноз (Diagnosis)
 ###############################################
 
-### GET все диагнозы
+### Получить все диагнозы
 GET {{baseUrl}}/api/diagnoses
+Authorization: Bearer {{authToken}}
 
-### GET диагноз по коду
-GET {{baseUrl}}/api/diagnoses/F70.0
-
-### POST создать диагноз
+### Создать диагноз
 POST {{baseUrl}}/api/diagnoses
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
   "code": "F70.0",
   "name": "Умственная отсталость легкой степени"
 }
 
-### PUT обновить диагноз
-PUT {{baseUrl}}/api/diagnoses/F70.0
-Content-Type: {{contentType}}
+### Получить диагноз по ID
+GET {{baseUrl}}/api/diagnoses/1
+Authorization: Bearer {{authToken}}
+
+### Обновить диагноз (ID = 1)
+PUT {{baseUrl}}/api/diagnoses/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
   "code": "F70.0",
   "name": "Легкая умственная отсталость"
 }
 
-### DELETE удалить диагноз
-DELETE {{baseUrl}}/api/diagnoses/F70.0
-
+### Удалить диагноз
+DELETE {{baseUrl}}/api/diagnoses/1
+Authorization: Bearer {{authToken}}
 
 ###############################################
-# 3. DiagnosisPupil (Диагноз воспитанника)
+# Связь Диагноз-Воспитанник (DiagnosisPupil)
 ###############################################
 
-### GET все связи диагноз-воспитанник
+### Получить все связи
 GET {{baseUrl}}/api/diagnosis-pupils
+Authorization: Bearer {{authToken}}
 
-### GET связь по составному ключу
-GET {{baseUrl}}/api/diagnosis-pupils/F70.0/1001
-
-### POST создать связь
+### Создать связь (предварительно должны существовать Pupil с ID=1 и Diagnosis с ID=1)
 POST {{baseUrl}}/api/diagnosis-pupils
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "diagnosisCode": "F70.0",
-  "personalFileNumber": 1001
+  "diagnosisId": 1,
+  "pupilId": 1
 }
 
-### DELETE удалить связь
-DELETE {{baseUrl}}/api/diagnosis-pupils/F70.0/1001
+### Получить связь по ID
+GET {{baseUrl}}/api/diagnosis-pupils/1
+Authorization: Bearer {{authToken}}
 
+### Обновить связь
+PUT {{baseUrl}}/api/diagnosis-pupils/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "diagnosisId": 2,
+  "pupilId": 1
+}
+
+### Удалить связь
+DELETE {{baseUrl}}/api/diagnosis-pupils/1
+Authorization: Bearer {{authToken}}
 
 ###############################################
-# 4. Teacher (Педагог)
+# Педагог (Teacher)
 ###############################################
 
-### GET все педагоги
+### Получить всех педагогов
 GET {{baseUrl}}/api/teachers
+Authorization: Bearer {{authToken}}
 
-### GET педагог по ФИО (URL-encoded)
-GET {{baseUrl}}/api/teachers/Петрова%20Анна%20Сергеевна
-
-### POST создать педагога
+### Создать педагога (регистрация обычно через auth, но можно и здесь)
 POST {{baseUrl}}/api/teachers
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "fullName": "Петрова Анна Сергеевна",
-  "birthDate": "1985-03-20",
-  "contactInfo": "+7-999-123-45-67",
-  "position": "Учитель начальных классов"
+  "fullName": "Сидорова Анна Владимировна",
+  "birthDate": "1975-08-20",
+  "contactInfo": "+79261234568",
+  "position": "Логопед"
 }
 
-### PUT обновить педагога
-PUT {{baseUrl}}/api/teachers/Петрова%20Анна%20Сергеевна
-Content-Type: {{contentType}}
+### Получить педагога по ID
+GET {{baseUrl}}/api/teachers/2
+Authorization: Bearer {{authToken}}
+
+### Обновить педагога
+PUT {{baseUrl}}/api/teachers/2
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "fullName": "Петрова Анна Сергеевна",
-  "birthDate": "1985-03-20",
-  "contactInfo": "+7-999-123-45-67",
-  "position": "Старший учитель"
+  "fullName": "Сидорова Анна Владимировна",
+  "birthDate": "1975-08-20",
+  "contactInfo": "+79261234569",
+  "position": "Старший логопед"
 }
 
-### DELETE удалить педагога
-DELETE {{baseUrl}}/api/teachers/Петрова%20Анна%20Сергеевна
-
+### Удалить педагога
+DELETE {{baseUrl}}/api/teachers/2
+Authorization: Bearer {{authToken}}
 
 ###############################################
-# 5. Guardian (Опекун)
+# Опекун (Guardian)
 ###############################################
 
-### GET все опекуны
+### Получить всех опекунов
 GET {{baseUrl}}/api/guardians
+Authorization: Bearer {{authToken}}
 
-### GET опекун по ФИО
-GET {{baseUrl}}/api/guardians/Сидорова%20Мария%20Ивановна
-
-### POST создать опекуна
+### Создать опекуна
 POST {{baseUrl}}/api/guardians
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "fullName": "Сидорова Мария Ивановна",
-  "contactInfo": "+7-888-555-33-22",
-  "address": "г. Москва, ул. Ленина, д. 10, кв. 5",
+  "fullName": "Иванова Мария Сергеевна",
+  "contactInfo": "+79164567890",
+  "address": "г. Москва, ул. Ленина, д.5, кв.12",
   "gender": "Ж",
-  "birthDate": "1975-08-12"
+  "birthDate": "1985-05-10"
 }
 
-### PUT обновить опекуна
-PUT {{baseUrl}}/api/guardians/Сидорова%20Мария%20Ивановна
-Content-Type: {{contentType}}
+### Получить опекуна по ID
+GET {{baseUrl}}/api/guardians/1
+Authorization: Bearer {{authToken}}
+
+### Обновить опекуна
+PUT {{baseUrl}}/api/guardians/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "fullName": "Сидорова Мария Ивановна",
-  "contactInfo": "+7-888-555-33-22",
-  "address": "г. Москва, ул. Пушкина, д. 5, кв. 12",
+  "fullName": "Иванова Мария Сергеевна",
+  "contactInfo": "+79164567891",
+  "address": "г. Москва, ул. Ленина, д.5, кв.12",
   "gender": "Ж",
-  "birthDate": "1975-08-12"
+  "birthDate": "1985-05-10"
 }
 
-### DELETE удалить опекуна
-DELETE {{baseUrl}}/api/guardians/Сидорова%20Мария%20Ивановна
-
+### Удалить опекуна
+DELETE {{baseUrl}}/api/guardians/1
+Authorization: Bearer {{authToken}}
 
 ###############################################
-# 6. GuardianPupil (Опекун воспитанника)
+# Связь Опекун-Воспитанник (GuardianPupil)
 ###############################################
 
-### GET все связи опекун-воспитанник
+### Получить все связи
 GET {{baseUrl}}/api/guardian-pupils
+Authorization: Bearer {{authToken}}
 
-### GET связь по номеру дела воспитанника
-GET {{baseUrl}}/api/guardian-pupils/1001
-
-### POST создать связь
+### Создать связь (нужны Pupil ID=1 и Guardian ID=1)
 POST {{baseUrl}}/api/guardian-pupils
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "guardianFullName": "Сидорова Мария Ивановна",
-  "personalFileNumber": 1001
+  "guardianId": 1,
+  "pupilId": 1
 }
 
-### PUT обновить связь
-PUT {{baseUrl}}/api/guardian-pupils/1001
-Content-Type: {{contentType}}
+### Получить связь по ID
+GET {{baseUrl}}/api/guardian-pupils/1
+Authorization: Bearer {{authToken}}
+
+### Обновить связь
+PUT {{baseUrl}}/api/guardian-pupils/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "guardianFullName": "Сидорова Мария Ивановна",
-  "personalFileNumber": 1001
+  "guardianId": 1,
+  "pupilId": 2
 }
 
-### DELETE удалить связь
-DELETE {{baseUrl}}/api/guardian-pupils/1001
-
+### Удалить связь
+DELETE {{baseUrl}}/api/guardian-pupils/1
+Authorization: Bearer {{authToken}}
 
 ###############################################
-# 7. Program (Программа)
+# Программа (Program)
 ###############################################
 
-### GET все программы
+### Получить все программы
 GET {{baseUrl}}/api/programs
+Authorization: Bearer {{authToken}}
 
-### GET программа по коду
-GET {{baseUrl}}/api/programs/1
-
-### POST создать программу
+### Создать программу
 POST {{baseUrl}}/api/programs
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "code": 1,
-  "name": "Адаптированная основная общеобразовательная программа"
+  "code": 101,
+  "name": "Адаптированная основная общеобразовательная программа (вариант 1)"
 }
 
-### PUT обновить программу
+### Получить программу по ID
+GET {{baseUrl}}/api/programs/1
+Authorization: Bearer {{authToken}}
+
+### Обновить программу
 PUT {{baseUrl}}/api/programs/1
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "code": 101,
+  "name": "АООП (вариант 1) - обновлено"
+}
+
+### Удалить программу
+DELETE {{baseUrl}}/api/programs/1
+Authorization: Bearer {{authToken}}
+
+###############################################
+# Предметная область (SubjectArea)
+###############################################
+
+### Получить все области
+GET {{baseUrl}}/api/subject-areas
+Authorization: Bearer {{authToken}}
+
+### Создать предметную область
+POST {{baseUrl}}/api/subject-areas
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
   "code": 1,
-  "name": "АООП (вариант 1)"
-}
-
-### DELETE удалить программу
-DELETE {{baseUrl}}/api/programs/1
-
-
-###############################################
-# 8. SubjectArea (Предметная область)
-###############################################
-
-### GET все предметные области
-GET {{baseUrl}}/api/subject-areas
-
-### GET область по коду
-GET {{baseUrl}}/api/subject-areas/10
-
-### POST создать область
-POST {{baseUrl}}/api/subject-areas
-Content-Type: {{contentType}}
-
-{
-  "code": 10,
   "name": "Язык и речевая практика"
 }
 
-### PUT обновить область
-PUT {{baseUrl}}/api/subject-areas/10
-Content-Type: {{contentType}}
+### Получить область по ID
+GET {{baseUrl}}/api/subject-areas/1
+Authorization: Bearer {{authToken}}
+
+### Обновить область
+PUT {{baseUrl}}/api/subject-areas/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "code": 10,
+  "code": 1,
   "name": "Русский язык и речевая практика"
 }
 
-### DELETE удалить область
-DELETE {{baseUrl}}/api/subject-areas/10
-
+### Удалить область
+DELETE {{baseUrl}}/api/subject-areas/1
+Authorization: Bearer {{authToken}}
 
 ###############################################
-# 9. MedicalEquipment (Медоборудование)
+# Медицинское оборудование (MedicalEquipment)
 ###############################################
 
-### GET всё оборудование
+### Получить всё оборудование
 GET {{baseUrl}}/api/medical-equipments
+Authorization: Bearer {{authToken}}
 
-### GET оборудование по инвентарному номеру
-GET {{baseUrl}}/api/medical-equipments/5001
-
-### POST создать оборудование
+### Создать оборудование (привязка к Pupil ID=1)
 POST {{baseUrl}}/api/medical-equipments
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
   "inventoryNumber": 5001,
   "name": "Ингалятор компрессорный",
-  "issueDate": "2023-09-01",
-  "personalFileNumber": 1001
+  "issueDate": "2024-01-15",
+  "pupilId": 1
 }
 
-### PUT обновить оборудование
-PUT {{baseUrl}}/api/medical-equipments/5001
-Content-Type: {{contentType}}
+### Получить оборудование по ID
+GET {{baseUrl}}/api/medical-equipments/1
+Authorization: Bearer {{authToken}}
+
+### Обновить оборудование
+PUT {{baseUrl}}/api/medical-equipments/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
   "inventoryNumber": 5001,
   "name": "Ингалятор ультразвуковой",
-  "issueDate": "2023-09-01",
-  "personalFileNumber": 1001
+  "issueDate": "2024-01-15",
+  "pupilId": 1
 }
 
-### DELETE удалить оборудование
-DELETE {{baseUrl}}/api/medical-equipments/5001
-
+### Удалить оборудование
+DELETE {{baseUrl}}/api/medical-equipments/1
+Authorization: Bearer {{authToken}}
 
 ###############################################
-# 10. IndividualProgram (Индивидуальная программа)
+# Индивидуальная программа (IndividualProgram)
 ###############################################
 
-### GET все индивидуальные программы
+### Получить все инд. программы
 GET {{baseUrl}}/api/individual-programs
+Authorization: Bearer {{authToken}}
 
-### GET по составному ключу (год/код программы)
-GET {{baseUrl}}/api/individual-programs/2024/1
-
-### POST создать индивидуальную программу
+### Создать инд. программу (требуется Program ID=1)
 POST {{baseUrl}}/api/individual-programs
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
   "year": 2024,
-  "programCode": 1
+  "programId": 1
 }
 
-### DELETE удалить индивидуальную программу
-DELETE {{baseUrl}}/api/individual-programs/2024/1
+### Получить по ID
+GET {{baseUrl}}/api/individual-programs/1
+Authorization: Bearer {{authToken}}
 
+### Обновить (например, изменить программу)
+PUT {{baseUrl}}/api/individual-programs/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "year": 2024,
+  "programId": 2
+}
+
+### Удалить
+DELETE {{baseUrl}}/api/individual-programs/1
+Authorization: Bearer {{authToken}}
 
 ###############################################
-# 11. PupilEducation (Обучение воспитанника)
+# Обучение воспитанника (PupilEducation)
 ###############################################
 
-### GET все обучения
+### Получить все обучения
 GET {{baseUrl}}/api/pupil-educations
+Authorization: Bearer {{authToken}}
 
-### GET обучение по коду
-GET {{baseUrl}}/api/pupil-educations/3001
-
-### POST создать обучение
+### Создать обучение (нужны IndividualProgram ID=1, Teacher ID=1, Pupil ID=1)
 POST {{baseUrl}}/api/pupil-educations
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
   "code": 3001,
-  "year": 2024,
-  "programCode": 1,
-  "teacherFullName": "Петрова Анна Сергеевна",
-  "personalFileNumber": 1001
+  "individualProgramId": 1,
+  "teacherId": 1,
+  "pupilId": 1
 }
 
-### PUT обновить обучение
-PUT {{baseUrl}}/api/pupil-educations/3001
-Content-Type: {{contentType}}
+### Получить по ID
+GET {{baseUrl}}/api/pupil-educations/1
+Authorization: Bearer {{authToken}}
+
+### Обновить
+PUT {{baseUrl}}/api/pupil-educations/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
   "code": 3001,
-  "year": 2024,
-  "programCode": 1,
-  "teacherFullName": "Петрова Анна Сергеевна",
-  "personalFileNumber": 1001
+  "individualProgramId": 1,
+  "teacherId": 2,
+  "pupilId": 1
 }
 
-### DELETE удалить обучение
-DELETE {{baseUrl}}/api/pupil-educations/3001
-
+### Удалить
+DELETE {{baseUrl}}/api/pupil-educations/1
+Authorization: Bearer {{authToken}}
 
 ###############################################
-# 12. Subject (Учебный предмет)
+# Учебный предмет (Subject)
 ###############################################
 
-### GET все предметы
+### Получить все предметы
 GET {{baseUrl}}/api/subjects
+Authorization: Bearer {{authToken}}
 
-### GET предмет по составному ключу (название/код области)
-GET {{baseUrl}}/api/subjects/Русский%20язык/10
-
-### POST создать предмет
+### Создать предмет (нужны SubjectArea ID=1, IndividualProgram ID=1)
 POST {{baseUrl}}/api/subjects
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
   "name": "Русский язык",
-  "subjectAreaCode": 10,
   "hours": 68,
-  "programCode": 1,
-  "year": 2024
+  "subjectAreaId": 1,
+  "individualProgramId": 1
 }
 
-### PUT обновить предмет
-PUT {{baseUrl}}/api/subjects/Русский%20язык/10
-Content-Type: {{contentType}}
+### Получить по ID
+GET {{baseUrl}}/api/subjects/1
+Authorization: Bearer {{authToken}}
+
+### Обновить
+PUT {{baseUrl}}/api/subjects/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
   "name": "Русский язык",
-  "subjectAreaCode": 10,
   "hours": 70,
-  "programCode": 1,
-  "year": 2024
+  "subjectAreaId": 1,
+  "individualProgramId": 1
 }
 
-### DELETE удалить предмет
-DELETE {{baseUrl}}/api/subjects/Русский%20язык/10
-
+### Удалить
+DELETE {{baseUrl}}/api/subjects/1
+Authorization: Bearer {{authToken}}
 
 ###############################################
-# 13. SubjectResult (Результат изучения предмета)
+# Результат изучения предмета (SubjectResult)
 ###############################################
 
-### GET все результаты
+### Получить все результаты
 GET {{baseUrl}}/api/subject-results
+Authorization: Bearer {{authToken}}
 
-### GET результат по составному ключу
-GET {{baseUrl}}/api/subject-results/Русский%20язык/10/3001
-
-### POST создать результат
+### Создать результат (нужны Subject ID=1, PupilEducation ID=1)
 POST {{baseUrl}}/api/subject-results
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "subjectName": "Русский язык",
-  "subjectAreaCode": 10,
-  "educationCode": 3001,
-  "goalDescription": "Формирование навыков чтения и письма",
-  "resultDescription": "Читает по слогам, пишет печатными буквами"
+  "subjectId": 1,
+  "educationId": 1,
+  "goalDescription": "Освоение грамоты",
+  "resultDescription": "Читает по слогам"
 }
 
-### PUT обновить результат
-PUT {{baseUrl}}/api/subject-results/Русский%20язык/10/3001
-Content-Type: {{contentType}}
+### Получить по ID
+GET {{baseUrl}}/api/subject-results/1
+Authorization: Bearer {{authToken}}
+
+### Обновить
+PUT {{baseUrl}}/api/subject-results/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "subjectName": "Русский язык",
-  "subjectAreaCode": 10,
-  "educationCode": 3001,
-  "goalDescription": "Формирование навыков чтения и письма",
-  "resultDescription": "Читает целыми словами, пишет прописными буквами"
+  "subjectId": 1,
+  "educationId": 1,
+  "goalDescription": "Освоение грамоты",
+  "resultDescription": "Читает целыми словами"
 }
 
-### DELETE удалить результат
-DELETE {{baseUrl}}/api/subject-results/Русский%20язык/10/3001
-
+### Удалить
+DELETE {{baseUrl}}/api/subject-results/1
+Authorization: Bearer {{authToken}}
 
 ###############################################
-# 14. PersonalResultType (Личностные результаты)
+# Личностные результаты (PersonalResultType)
 ###############################################
 
-### GET все личностные результаты
+### Получить все
 GET {{baseUrl}}/api/personal-result-types
+Authorization: Bearer {{authToken}}
 
-### GET по коду обучения
-GET {{baseUrl}}/api/personal-result-types/3001
-
-### POST создать
+### Создать (нужен PupilEducation ID=1)
 POST {{baseUrl}}/api/personal-result-types
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "educationCode": 3001,
-  "description": "Проявляет интерес к учебной деятельности"
+  "educationId": 1,
+  "description": "Проявляет интерес к учебе"
 }
 
-### PUT обновить
-PUT {{baseUrl}}/api/personal-result-types/3001
-Content-Type: {{contentType}}
+### Получить по ID
+GET {{baseUrl}}/api/personal-result-types/1
+Authorization: Bearer {{authToken}}
+
+### Обновить
+PUT {{baseUrl}}/api/personal-result-types/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "educationCode": 3001,
-  "description": "Активно участвует в учебном процессе"
+  "educationId": 1,
+  "description": "Активно участвует в занятиях"
 }
 
-### DELETE удалить
-DELETE {{baseUrl}}/api/personal-result-types/3001
-
+### Удалить
+DELETE {{baseUrl}}/api/personal-result-types/1
+Authorization: Bearer {{authToken}}
 
 ###############################################
-# 15. SubjectResultType (Предметные результаты)
+# Предметные результаты (SubjectResultType)
 ###############################################
 
-### GET все предметные результаты
+### Получить все
 GET {{baseUrl}}/api/subject-result-types
+Authorization: Bearer {{authToken}}
 
-### GET по коду обучения
-GET {{baseUrl}}/api/subject-result-types/3001
-
-### POST создать
+### Создать (нужен PupilEducation ID=1)
 POST {{baseUrl}}/api/subject-result-types
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "educationCode": 3001,
-  "description": "Усвоил программу по математике на базовом уровне"
+  "educationId": 1,
+  "description": "Усвоил программу по математике"
 }
 
-### PUT обновить
-PUT {{baseUrl}}/api/subject-result-types/3001
-Content-Type: {{contentType}}
+### Получить по ID
+GET {{baseUrl}}/api/subject-result-types/1
+Authorization: Bearer {{authToken}}
+
+### Обновить
+PUT {{baseUrl}}/api/subject-result-types/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "educationCode": 3001,
+  "educationId": 1,
   "description": "Усвоил программу по математике на повышенном уровне"
 }
 
-### DELETE удалить
-DELETE {{baseUrl}}/api/subject-result-types/3001
-
+### Удалить
+DELETE {{baseUrl}}/api/subject-result-types/1
+Authorization: Bearer {{authToken}}
 
 ###############################################
-# 16. BasicActionResultType (Базовые учебные действия)
+# Базовые учебные действия (BasicActionResultType)
 ###############################################
 
-### GET все базовые действия
+### Получить все
 GET {{baseUrl}}/api/basic-action-result-types
+Authorization: Bearer {{authToken}}
 
-### GET по коду обучения
-GET {{baseUrl}}/api/basic-action-result-types/3001
-
-### POST создать
+### Создать (нужен PupilEducation ID=1)
 POST {{baseUrl}}/api/basic-action-result-types
-Content-Type: {{contentType}}
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "educationCode": 3001,
+  "educationId": 1,
   "description": "Умеет работать по образцу"
 }
 
-### PUT обновить
-PUT {{baseUrl}}/api/basic-action-result-types/3001
-Content-Type: {{contentType}}
+### Получить по ID
+GET {{baseUrl}}/api/basic-action-result-types/1
+Authorization: Bearer {{authToken}}
+
+### Обновить
+PUT {{baseUrl}}/api/basic-action-result-types/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
 
 {
-  "educationCode": 3001,
+  "educationId": 1,
   "description": "Умеет самостоятельно планировать действия"
 }
 
-### DELETE удалить
-DELETE {{baseUrl}}/api/basic-action-result-types/3001
+### Удалить
+DELETE {{baseUrl}}/api/basic-action-result-types/1
+Authorization: Bearer {{authToken}}
