@@ -20,6 +20,6 @@ public class SubjectResultType {
     @JoinColumn(name = "\"Код_обучамого_в_определенном_году\"", referencedColumnName = "\"Код_обучамого_в_определенном_году\"", unique = true)
     private PupilEducation education;
 
-    @Column(name = "\"Описание_особенностей_предметных_результата\"")
+    @Column(name = "\"Описание_особенностей_предметных_\"")
     private String description;
 }
