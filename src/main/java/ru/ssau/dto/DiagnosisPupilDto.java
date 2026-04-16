@@ -4,8 +4,11 @@ import lombok.Data;
 
 @Data
 public class DiagnosisPupilDto {
+    private Long id;
+    private Long diagnosisId;
     private String diagnosisCode;
-    private Integer personalFileNumber;
-    private String diagnosisName;   // из Diagnosis
-    private String pupilFullName;   // из Pupil
+    private String diagnosisName;
+    private Long pupilId;
+    private Integer pupilPersonalFileNumber;
+    private String pupilFullName;
 }

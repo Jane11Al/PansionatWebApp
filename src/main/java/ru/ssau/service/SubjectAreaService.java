@@ -1,48 +1,57 @@
 package ru.ssau.service;
 
-import ru.ssau.dto.*;
-import ru.ssau.entity.*;
-import ru.ssau.mapstruct.*;
-import ru.ssau.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ssau.dto.SubjectAreaDto;
+import ru.ssau.entity.SubjectArea;
+import ru.ssau.exception.EntityNotFoundException;
+import ru.ssau.mapper.SubjectAreaMapper;
+import ru.ssau.repository.SubjectAreaRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class SubjectAreaService {
+public class SubjectAreaService implements BaseService<SubjectAreaDto, Long> {
+
     private final SubjectAreaRepository repository;
     private final SubjectAreaMapper mapper;
 
+    @Override
     public List<SubjectAreaDto> findAll() {
-        return repository.findAll().stream().map(mapper::toDto).toList();
+        return mapper.toDtoList(repository.findAll());
     }
 
-    public SubjectAreaDto findById(Integer code) {
-        return repository.findById(code).map(mapper::toDto)
-                .orElseThrow(() -> new RuntimeException("SubjectArea not found: " + code));
+    @Override
+    public SubjectAreaDto findById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new EntityNotFoundException("Предметная область", id));
     }
 
+    @Override
     @Transactional
     public SubjectAreaDto create(SubjectAreaDto dto) {
         SubjectArea entity = mapper.toEntity(dto);
         return mapper.toDto(repository.save(entity));
     }
 
+    @Override
     @Transactional
-    public SubjectAreaDto update(Integer code, SubjectAreaDto dto) {
-        if (!repository.existsById(code)) {
-            throw new RuntimeException("SubjectArea not found: " + code);
-        }
-        SubjectArea entity = mapper.toEntity(dto);
-        entity.setCode(code);
-        return mapper.toDto(repository.save(entity));
+    public SubjectAreaDto update(Long id, SubjectAreaDto dto) {
+        SubjectArea existing = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Предметная область", id));
+        mapper.updateEntity(dto, existing);
+        return mapper.toDto(repository.save(existing));
     }
 
+    @Override
     @Transactional
-    public void delete(Integer code) {
-        repository.deleteById(code);
+    public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new EntityNotFoundException("Предметная область", id);
+        }
+        repository.deleteById(id);
     }
 }

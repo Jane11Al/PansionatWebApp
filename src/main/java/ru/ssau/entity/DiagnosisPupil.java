@@ -1,26 +1,27 @@
 package ru.ssau.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Entity
-@Table(name = "\"Диагноз_воспитанника\"")
+@Table(name = "\"Диагноз_воспитанника\"",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"\"Код_заболевания\"", "\"Номер_личного_дела_воспитанника\""}))
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class DiagnosisPupil {
-    @EmbeddedId
-    private DiagnosisPupilId id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne
-    @MapsId("diagnosisCode")
-    @JoinColumn(name = "\"Код_заболевания\"")
+    @JoinColumn(name = "\"Код_заболевания\"", referencedColumnName = "\"Код_заболевания\"")
     private Diagnosis diagnosis;
 
     @ManyToOne
-    @MapsId("personalFileNumber")
-    @JoinColumn(name = "\"Номер_личного_дела_воспитанника\"")
+    @JoinColumn(name = "\"Номер_личного_дела_воспитанника\"", referencedColumnName = "\"Номер_личного_дела_воспитанника\"")
     private Pupil pupil;
 }

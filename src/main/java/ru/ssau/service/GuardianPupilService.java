@@ -1,56 +1,73 @@
 package ru.ssau.service;
 
-import ru.ssau.dto.*;
-import ru.ssau.entity.*;
-import ru.ssau.mapstruct.*;
-import ru.ssau.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ssau.dto.GuardianPupilDto;
+import ru.ssau.entity.GuardianPupil;
+import ru.ssau.exception.EntityNotFoundException;
+import ru.ssau.mapper.GuardianPupilMapper;
+import ru.ssau.repository.GuardianPupilRepository;
+import ru.ssau.repository.GuardianRepository;
+import ru.ssau.repository.PupilRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class GuardianPupilService {
+public class GuardianPupilService implements BaseService<GuardianPupilDto, Long> {
+
     private final GuardianPupilRepository repository;
-    private final GuardianPupilMapper mapper;
     private final GuardianRepository guardianRepository;
     private final PupilRepository pupilRepository;
+    private final GuardianPupilMapper mapper;
 
+    @Override
     public List<GuardianPupilDto> findAll() {
-        return repository.findAll().stream().map(mapper::toDto).toList();
+        return mapper.toDtoList(repository.findAll());
     }
 
-    // Поскольку PK только personalFileNumber, используем его
-    public GuardianPupilDto findById(Integer personalFileNumber) {
-        return repository.findById(personalFileNumber).map(mapper::toDto)
-                .orElseThrow(() -> new RuntimeException("GuardianPupil not found for pupil: " + personalFileNumber));
+    @Override
+    public GuardianPupilDto findById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new EntityNotFoundException("Связь опекун-воспитанник", id));
     }
 
+    @Override
     @Transactional
     public GuardianPupilDto create(GuardianPupilDto dto) {
-        GuardianPupil entity = new GuardianPupil();
-        entity.setPersonalFileNumber(dto.getPersonalFileNumber());
-        entity.setGuardian(guardianRepository.getReferenceById(dto.getGuardianFullName()));
-        entity.setPupil(pupilRepository.getReferenceById(dto.getPersonalFileNumber()));
-        return mapper.toDto(repository.save(entity));
-    }
-
-    @Transactional
-    public GuardianPupilDto update(Integer personalFileNumber, GuardianPupilDto dto) {
-        if (!repository.existsById(personalFileNumber)) {
-            throw new RuntimeException("GuardianPupil not found for pupil: " + personalFileNumber);
+        GuardianPupil entity = mapper.toEntity(dto);
+        if (dto.getGuardianId() != null) {
+            entity.setGuardian(guardianRepository.getReferenceById(dto.getGuardianId()));
         }
-        GuardianPupil entity = new GuardianPupil();
-        entity.setPersonalFileNumber(personalFileNumber);
-        entity.setGuardian(guardianRepository.getReferenceById(dto.getGuardianFullName()));
-        entity.setPupil(pupilRepository.getReferenceById(personalFileNumber));
+        if (dto.getPupilId() != null) {
+            entity.setPupil(pupilRepository.getReferenceById(dto.getPupilId()));
+        }
         return mapper.toDto(repository.save(entity));
     }
 
+    @Override
     @Transactional
-    public void delete(Integer personalFileNumber) {
-        repository.deleteById(personalFileNumber);
+    public GuardianPupilDto update(Long id, GuardianPupilDto dto) {
+        GuardianPupil existing = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Связь опекун-воспитанник", id));
+        mapper.updateEntity(dto, existing);
+        if (dto.getGuardianId() != null) {
+            existing.setGuardian(guardianRepository.getReferenceById(dto.getGuardianId()));
+        }
+        if (dto.getPupilId() != null) {
+            existing.setPupil(pupilRepository.getReferenceById(dto.getPupilId()));
+        }
+        return mapper.toDto(repository.save(existing));
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new EntityNotFoundException("Связь опекун-воспитанник", id);
+        }
+        repository.deleteById(id);
     }
 }

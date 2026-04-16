@@ -1,25 +1,25 @@
 package ru.ssau.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Entity
 @Table(name = "\"Вид_личностых_результатов\"")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class PersonalResultType {
-    @Id
-    @Column(name = "\"Код_обучамого_в_определенном_году\"")
-    private Integer educationCode;
 
-    @Column(name = "\"Описание_особенностей_личностног\"")
-    private String description;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @OneToOne
-    @MapsId
-    @JoinColumn(name = "\"Код_обучамого_в_определенном_году\"")
+    @JoinColumn(name = "\"Код_обучамого_в_определенном_году\"", referencedColumnName = "\"Код_обучамого_в_определенном_году\"", unique = true)
     private PupilEducation education;
+
+    @Column(name = "\"Описание_особенностей_личностного_результата\"")
+    private String description;
 }

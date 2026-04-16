@@ -1,22 +1,25 @@
 package ru.ssau.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
 @Table(name = "\"Педагог\"")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Teacher {
+
     @Id
-    @Column(name = "\"ФИО_педагога\"")
-    private String fullName;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "\"ФИО_педагога\"", unique = true, nullable = false)
+    private String fullName;   // используется как логин
 
     @Column(name = "\"Дата_рождения\"")
     private LocalDate birthDate;
@@ -26,6 +29,12 @@ public class Teacher {
 
     @Column(name = "\"Должность\"")
     private String position;
+
+    @Column(nullable = false)
+    private String password;   // хешированный пароль
+
+    @Column(nullable = false)
+    private String role;       // например "ROLE_TEACHER" или "ROLE_ADMIN"
 
     @OneToMany(mappedBy = "teacher")
     private Set<PupilEducation> educations;

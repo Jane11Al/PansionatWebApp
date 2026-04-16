@@ -1,48 +1,68 @@
 package ru.ssau.service;
 
-import ru.ssau.dto.*;
-import ru.ssau.entity.*;
-import ru.ssau.mapstruct.*;
-import ru.ssau.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ssau.dto.TeacherDto;
+import ru.ssau.entity.Teacher;
+import ru.ssau.exception.EntityNotFoundException;
+import ru.ssau.mapper.TeacherMapper;
+import ru.ssau.repository.TeacherRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class TeacherService {
+public class TeacherService implements BaseService<TeacherDto, Long> {
+
     private final TeacherRepository repository;
     private final TeacherMapper mapper;
+    private final PasswordEncoder passwordEncoder;
 
+    @Override
     public List<TeacherDto> findAll() {
-        return repository.findAll().stream().map(mapper::toDto).toList();
+        return mapper.toDtoList(repository.findAll());
     }
 
-    public TeacherDto findById(String fullName) {
-        return repository.findById(fullName).map(mapper::toDto)
-                .orElseThrow(() -> new RuntimeException("Teacher not found: " + fullName));
+    @Override
+    public TeacherDto findById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new EntityNotFoundException("Педагог", id));
     }
 
+    @Override
     @Transactional
     public TeacherDto create(TeacherDto dto) {
         Teacher entity = mapper.toEntity(dto);
+        // Пароль должен быть установлен отдельно, например при регистрации
         return mapper.toDto(repository.save(entity));
     }
 
+    @Override
     @Transactional
-    public TeacherDto update(String fullName, TeacherDto dto) {
-        if (!repository.existsById(fullName)) {
-            throw new RuntimeException("Teacher not found: " + fullName);
+    public TeacherDto update(Long id, TeacherDto dto) {
+        Teacher existing = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Педагог", id));
+        mapper.updateEntity(dto, existing);
+        return mapper.toDto(repository.save(existing));
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new EntityNotFoundException("Педагог", id);
         }
-        Teacher entity = mapper.toEntity(dto);
-        entity.setFullName(fullName);
-        return mapper.toDto(repository.save(entity));
+        repository.deleteById(id);
     }
 
     @Transactional
-    public void delete(String fullName) {
-        repository.deleteById(fullName);
+    public void updatePassword(Long id, String rawPassword) {
+        Teacher teacher = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Педагог", id));
+        teacher.setPassword(passwordEncoder.encode(rawPassword));
+        repository.save(teacher);
     }
 }

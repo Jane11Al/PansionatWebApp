@@ -1,21 +1,24 @@
 package ru.ssau.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
 @Table(name = "\"Опекун\"")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Guardian {
+
     @Id
-    @Column(name = "\"ФИО_опекуна\"")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "\"ФИО_опекуна\"", unique = true, nullable = false)
     private String fullName;
 
     @Column(name = "\"Контактная_информация\"")

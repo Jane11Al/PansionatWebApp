@@ -1,64 +1,75 @@
 package ru.ssau.service;
 
-import ru.ssau.dto.*;
-import ru.ssau.entity.*;
-import ru.ssau.mapstruct.*;
-import ru.ssau.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ssau.dto.SubjectDto;
+import ru.ssau.entity.Subject;
+import ru.ssau.exception.EntityNotFoundException;
+import ru.ssau.mapper.SubjectMapper;
+import ru.ssau.repository.*;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class SubjectService {
+public class SubjectService implements BaseService<SubjectDto, Long> {
+
     private final SubjectRepository repository;
-    private final SubjectMapper mapper;
     private final SubjectAreaRepository subjectAreaRepository;
     private final IndividualProgramRepository individualProgramRepository;
+    private final SubjectMapper mapper;
 
+    @Override
     public List<SubjectDto> findAll() {
-        return repository.findAll().stream().map(mapper::toDto).toList();
+        return mapper.toDtoList(repository.findAll());
     }
 
-    public SubjectDto findById(String name, Integer subjectAreaCode) {
-        SubjectId id = new SubjectId(name, subjectAreaCode);
-        return repository.findById(id).map(mapper::toDto)
-                .orElseThrow(() -> new RuntimeException("Subject not found"));
+    @Override
+    public SubjectDto findById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new EntityNotFoundException("Учебный предмет", id));
     }
 
+    @Override
     @Transactional
     public SubjectDto create(SubjectDto dto) {
         Subject entity = mapper.toEntity(dto);
-        entity.setSubjectArea(subjectAreaRepository.getReferenceById(dto.getSubjectAreaCode()));
-        if (dto.getProgramCode() != null && dto.getYear() != null) {
-            IndividualProgramId ipId = new IndividualProgramId(dto.getYear(), dto.getProgramCode());
-            entity.setIndividualProgram(individualProgramRepository.getReferenceById(ipId));
+        if (dto.getSubjectAreaId() != null) {
+            entity.setSubjectArea(subjectAreaRepository.getReferenceById(dto.getSubjectAreaId()));
+        }
+        if (dto.getIndividualProgramId() != null) {
+            entity.setIndividualProgram(individualProgramRepository.getReferenceById(dto.getIndividualProgramId()));
         }
         return mapper.toDto(repository.save(entity));
     }
 
+    @Override
     @Transactional
-    public SubjectDto update(String name, Integer subjectAreaCode, SubjectDto dto) {
-        SubjectId id = new SubjectId(name, subjectAreaCode);
+    public SubjectDto update(Long id, SubjectDto dto) {
+        Subject existing = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Учебный предмет", id));
+        mapper.updateEntity(dto, existing);
+        if (dto.getSubjectAreaId() != null) {
+            existing.setSubjectArea(subjectAreaRepository.getReferenceById(dto.getSubjectAreaId()));
+        } else {
+            existing.setSubjectArea(null);
+        }
+        if (dto.getIndividualProgramId() != null) {
+            existing.setIndividualProgram(individualProgramRepository.getReferenceById(dto.getIndividualProgramId()));
+        } else {
+            existing.setIndividualProgram(null);
+        }
+        return mapper.toDto(repository.save(existing));
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
         if (!repository.existsById(id)) {
-            throw new RuntimeException("Subject not found");
+            throw new EntityNotFoundException("Учебный предмет", id);
         }
-        Subject entity = mapper.toEntity(dto);
-        entity.getId().setName(name);
-        entity.getId().setSubjectAreaCode(subjectAreaCode);
-        entity.setSubjectArea(subjectAreaRepository.getReferenceById(subjectAreaCode));
-        if (dto.getProgramCode() != null && dto.getYear() != null) {
-            IndividualProgramId ipId = new IndividualProgramId(dto.getYear(), dto.getProgramCode());
-            entity.setIndividualProgram(individualProgramRepository.getReferenceById(ipId));
-        }
-        return mapper.toDto(repository.save(entity));
-    }
-
-    @Transactional
-    public void delete(String name, Integer subjectAreaCode) {
-        SubjectId id = new SubjectId(name, subjectAreaCode);
         repository.deleteById(id);
     }
 }

@@ -1,38 +1,32 @@
 package ru.ssau.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
+import lombok.AllArgsConstructor;
 
 @Entity
 @Table(name = "\"Результат_изучения_учебных_предметов_воспитанника\"")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class SubjectResult {
-    @EmbeddedId
-    private SubjectResultId id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "subject_id")
+    private Subject subject;
+
+    @ManyToOne
+    @JoinColumn(name = "\"Код_обучамого_в_определенном_году\"", referencedColumnName = "\"Код_обучамого_в_определенном_году\"")
+    private PupilEducation education;
 
     @Column(name = "\"Описание_цели_обучения\"")
     private String goalDescription;
 
     @Column(name = "\"Описание_результатов_обучения\"")
     private String resultDescription;
-
-    @ManyToOne
-    @MapsId("subject")
-    @JoinColumns({
-            @JoinColumn(name = "\"Название_учебного_предмета\"", referencedColumnName = "\"Название_учебного_предмета\""),
-            @JoinColumn(name = "\"Код_предметной_области\"", referencedColumnName = "\"Код_предметной_области\"")
-    })
-    private Subject subject;
-
-    @ManyToOne
-    @MapsId("educationCode")
-    @JoinColumn(name = "\"Код_обучамого_в_определенном_году\"")
-    private PupilEducation education;
 }
-

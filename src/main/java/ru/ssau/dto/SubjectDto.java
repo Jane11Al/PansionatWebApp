@@ -4,11 +4,14 @@ import lombok.Data;
 
 @Data
 public class SubjectDto {
+    private Long id;
     private String name;
+    private Short hours;
+    private Long subjectAreaId;
     private Integer subjectAreaCode;
     private String subjectAreaName;
-    private Short hours;
-    private Integer programCode;
+    private Long individualProgramId;
     private Short year;
+    private Integer programCode;
     private String programName;
 }

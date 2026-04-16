@@ -1,51 +1,67 @@
 package ru.ssau.service;
 
-import ru.ssau.dto.*;
-import ru.ssau.entity.*;
-import ru.ssau.mapstruct.*;
-import ru.ssau.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ssau.dto.PersonalResultTypeDto;
+import ru.ssau.entity.PersonalResultType;
+import ru.ssau.exception.EntityNotFoundException;
+import ru.ssau.mapper.PersonalResultTypeMapper;
+import ru.ssau.repository.PersonalResultTypeRepository;
+import ru.ssau.repository.PupilEducationRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class PersonalResultTypeService {
+public class PersonalResultTypeService implements BaseService<PersonalResultTypeDto, Long> {
+
     private final PersonalResultTypeRepository repository;
-    private final PersonalResultTypeMapper mapper;
     private final PupilEducationRepository educationRepository;
+    private final PersonalResultTypeMapper mapper;
 
+    @Override
     public List<PersonalResultTypeDto> findAll() {
-        return repository.findAll().stream().map(mapper::toDto).toList();
+        return mapper.toDtoList(repository.findAll());
     }
 
-    public PersonalResultTypeDto findById(Integer educationCode) {
-        return repository.findById(educationCode).map(mapper::toDto)
-                .orElseThrow(() -> new RuntimeException("PersonalResultType not found for education: " + educationCode));
+    @Override
+    public PersonalResultTypeDto findById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new EntityNotFoundException("Личностные результаты", id));
     }
 
+    @Override
     @Transactional
     public PersonalResultTypeDto create(PersonalResultTypeDto dto) {
         PersonalResultType entity = mapper.toEntity(dto);
-        entity.setEducation(educationRepository.getReferenceById(dto.getEducationCode()));
-        return mapper.toDto(repository.save(entity));
-    }
-
-    @Transactional
-    public PersonalResultTypeDto update(Integer educationCode, PersonalResultTypeDto dto) {
-        if (!repository.existsById(educationCode)) {
-            throw new RuntimeException("PersonalResultType not found for education: " + educationCode);
+        if (dto.getEducationId() != null) {
+            entity.setEducation(educationRepository.getReferenceById(dto.getEducationId()));
         }
-        PersonalResultType entity = mapper.toEntity(dto);
-        entity.setEducationCode(educationCode);
-        entity.setEducation(educationRepository.getReferenceById(educationCode));
         return mapper.toDto(repository.save(entity));
     }
 
+    @Override
     @Transactional
-    public void delete(Integer educationCode) {
-        repository.deleteById(educationCode);
+    public PersonalResultTypeDto update(Long id, PersonalResultTypeDto dto) {
+        PersonalResultType existing = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Личностные результаты", id));
+        mapper.updateEntity(dto, existing);
+        if (dto.getEducationId() != null) {
+            existing.setEducation(educationRepository.getReferenceById(dto.getEducationId()));
+        } else {
+            existing.setEducation(null);
+        }
+        return mapper.toDto(repository.save(existing));
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new EntityNotFoundException("Личностные результаты", id);
+        }
+        repository.deleteById(id);
     }
 }

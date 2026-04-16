@@ -1,44 +1,67 @@
 package ru.ssau.service;
 
-import ru.ssau.dto.*;
-import ru.ssau.entity.*;
-import ru.ssau.mapstruct.*;
-import ru.ssau.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ssau.dto.IndividualProgramDto;
+import ru.ssau.entity.IndividualProgram;
+import ru.ssau.exception.EntityNotFoundException;
+import ru.ssau.mapper.IndividualProgramMapper;
+import ru.ssau.repository.IndividualProgramRepository;
+import ru.ssau.repository.ProgramRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class IndividualProgramService {
+public class IndividualProgramService implements BaseService<IndividualProgramDto, Long> {
+
     private final IndividualProgramRepository repository;
-    private final IndividualProgramMapper mapper;
     private final ProgramRepository programRepository;
+    private final IndividualProgramMapper mapper;
 
+    @Override
     public List<IndividualProgramDto> findAll() {
-        return repository.findAll().stream().map(mapper::toDto).toList();
+        return mapper.toDtoList(repository.findAll());
     }
 
-    public IndividualProgramDto findById(Short year, Integer programCode) {
-        IndividualProgramId id = new IndividualProgramId(year, programCode);
-        return repository.findById(id).map(mapper::toDto)
-                .orElseThrow(() -> new RuntimeException("IndividualProgram not found"));
+    @Override
+    public IndividualProgramDto findById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new EntityNotFoundException("Индивидуальная программа", id));
     }
 
+    @Override
     @Transactional
     public IndividualProgramDto create(IndividualProgramDto dto) {
-        IndividualProgram entity = new IndividualProgram();
-        IndividualProgramId id = new IndividualProgramId(dto.getYear(), dto.getProgramCode());
-        entity.setId(id);
-        entity.setProgram(programRepository.getReferenceById(dto.getProgramCode()));
+        IndividualProgram entity = mapper.toEntity(dto);
+        if (dto.getProgramId() != null) {
+            entity.setProgram(programRepository.getReferenceById(dto.getProgramId()));
+        }
         return mapper.toDto(repository.save(entity));
     }
 
+    @Override
     @Transactional
-    public void delete(Short year, Integer programCode) {
-        IndividualProgramId id = new IndividualProgramId(year, programCode);
+    public IndividualProgramDto update(Long id, IndividualProgramDto dto) {
+        IndividualProgram existing = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Индивидуальная программа", id));
+        mapper.updateEntity(dto, existing);
+        if (dto.getProgramId() != null) {
+            existing.setProgram(programRepository.getReferenceById(dto.getProgramId()));
+        } else {
+            existing.setProgram(null);
+        }
+        return mapper.toDto(repository.save(existing));
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new EntityNotFoundException("Индивидуальная программа", id);
+        }
         repository.deleteById(id);
     }
 }

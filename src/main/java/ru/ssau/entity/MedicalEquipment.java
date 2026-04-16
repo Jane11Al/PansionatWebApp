@@ -1,20 +1,23 @@
 package ru.ssau.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "\"Мед_оборудование\"")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class MedicalEquipment {
+
     @Id
-    @Column(name = "\"Инвентарный_номер_оборудования\"")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "\"Инвентарный_номер_оборудования\"", unique = true, nullable = false)
     private Integer inventoryNumber;
 
     @Column(name = "\"Название\"")
@@ -24,6 +27,6 @@ public class MedicalEquipment {
     private LocalDate issueDate;
 
     @ManyToOne
-    @JoinColumn(name = "\"Номер_личного_дела_воспитанника\"")
+    @JoinColumn(name = "\"Номер_личного_дела_воспитанника\"", referencedColumnName = "\"Номер_личного_дела_воспитанника\"")
     private Pupil pupil;
 }

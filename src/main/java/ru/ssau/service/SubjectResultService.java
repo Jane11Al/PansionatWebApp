@@ -1,61 +1,75 @@
 package ru.ssau.service;
 
-import ru.ssau.dto.*;
-import ru.ssau.entity.*;
-import ru.ssau.mapstruct.*;
-import ru.ssau.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ssau.dto.SubjectResultDto;
+import ru.ssau.entity.SubjectResult;
+import ru.ssau.exception.EntityNotFoundException;
+import ru.ssau.mapper.SubjectResultMapper;
+import ru.ssau.repository.*;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class SubjectResultService {
+public class SubjectResultService implements BaseService<SubjectResultDto, Long> {
+
     private final SubjectResultRepository repository;
-    private final SubjectResultMapper mapper;
     private final SubjectRepository subjectRepository;
     private final PupilEducationRepository educationRepository;
+    private final SubjectResultMapper mapper;
 
+    @Override
     public List<SubjectResultDto> findAll() {
-        return repository.findAll().stream().map(mapper::toDto).toList();
+        return mapper.toDtoList(repository.findAll());
     }
 
-    public SubjectResultDto findById(String subjectName, Integer subjectAreaCode, Integer educationCode) {
-        SubjectResultId id = new SubjectResultId(subjectName, subjectAreaCode, educationCode);
-        return repository.findById(id).map(mapper::toDto)
-                .orElseThrow(() -> new RuntimeException("SubjectResult not found"));
+    @Override
+    public SubjectResultDto findById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new EntityNotFoundException("Результат изучения предмета", id));
     }
 
+    @Override
     @Transactional
     public SubjectResultDto create(SubjectResultDto dto) {
         SubjectResult entity = mapper.toEntity(dto);
-        SubjectId subjectId = new SubjectId(dto.getSubjectName(), dto.getSubjectAreaCode());
-        entity.setSubject(subjectRepository.getReferenceById(subjectId));
-        entity.setEducation(educationRepository.getReferenceById(dto.getEducationCode()));
-        return mapper.toDto(repository.save(entity));
-    }
-
-    @Transactional
-    public SubjectResultDto update(String subjectName, Integer subjectAreaCode, Integer educationCode, SubjectResultDto dto) {
-        SubjectResultId id = new SubjectResultId(subjectName, subjectAreaCode, educationCode);
-        if (!repository.existsById(id)) {
-            throw new RuntimeException("SubjectResult not found");
+        if (dto.getSubjectId() != null) {
+            entity.setSubject(subjectRepository.getReferenceById(dto.getSubjectId()));
         }
-        SubjectResult entity = mapper.toEntity(dto);
-        entity.getId().setSubjectName(subjectName);
-        entity.getId().setSubjectAreaCode(subjectAreaCode);
-        entity.getId().setEducationCode(educationCode);
-        SubjectId subjectId = new SubjectId(subjectName, subjectAreaCode);
-        entity.setSubject(subjectRepository.getReferenceById(subjectId));
-        entity.setEducation(educationRepository.getReferenceById(educationCode));
+        if (dto.getEducationId() != null) {
+            entity.setEducation(educationRepository.getReferenceById(dto.getEducationId()));
+        }
         return mapper.toDto(repository.save(entity));
     }
 
+    @Override
     @Transactional
-    public void delete(String subjectName, Integer subjectAreaCode, Integer educationCode) {
-        SubjectResultId id = new SubjectResultId(subjectName, subjectAreaCode, educationCode);
+    public SubjectResultDto update(Long id, SubjectResultDto dto) {
+        SubjectResult existing = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Результат изучения предмета", id));
+        mapper.updateEntity(dto, existing);
+        if (dto.getSubjectId() != null) {
+            existing.setSubject(subjectRepository.getReferenceById(dto.getSubjectId()));
+        } else {
+            existing.setSubject(null);
+        }
+        if (dto.getEducationId() != null) {
+            existing.setEducation(educationRepository.getReferenceById(dto.getEducationId()));
+        } else {
+            existing.setEducation(null);
+        }
+        return mapper.toDto(repository.save(existing));
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new EntityNotFoundException("Результат изучения предмета", id);
+        }
         repository.deleteById(id);
     }
 }

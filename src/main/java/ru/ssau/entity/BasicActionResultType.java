@@ -1,28 +1,25 @@
 package ru.ssau.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
+import lombok.AllArgsConstructor;
 
 @Entity
-@Table(name = "\"Вид_результатов_базовых_учебных_д\"")
+@Table(name = "\"Вид_результатов_базовых_учебных_действий\"")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class BasicActionResultType {
-    @jakarta.persistence.Id
-    private Long id;
-    @Id
-    @Column(name = "\"Код_обучамого_в_определенном_году\"")
-    private Integer educationCode;
 
-    @Column(name = "\"Описание_особенностей_результата_\"")
-    private String description;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @OneToOne
-    @MapsId
-    @JoinColumn(name = "\"Код_обучамого_в_определенном_году\"")
+    @JoinColumn(name = "\"Код_обучамого_в_определенном_году\"", referencedColumnName = "\"Код_обучамого_в_определенном_году\"", unique = true)
     private PupilEducation education;
+
+    @Column(name = "\"Описание_особенностей_результата_базовых_учебных_действий\"")
+    private String description;
 }

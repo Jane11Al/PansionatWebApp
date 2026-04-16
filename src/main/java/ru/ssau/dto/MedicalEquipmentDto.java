@@ -5,9 +5,11 @@ import java.time.LocalDate;
 
 @Data
 public class MedicalEquipmentDto {
+    private Long id;
     private Integer inventoryNumber;
     private String name;
     private LocalDate issueDate;
-    private Integer personalFileNumber;
+    private Long pupilId;
+    private Integer pupilPersonalFileNumber;
     private String pupilFullName;
 }

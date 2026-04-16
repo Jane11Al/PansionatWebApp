@@ -1,51 +1,67 @@
 package ru.ssau.service;
 
-import ru.ssau.dto.*;
-import ru.ssau.entity.*;
-import ru.ssau.mapstruct.*;
-import ru.ssau.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ssau.dto.SubjectResultTypeDto;
+import ru.ssau.entity.SubjectResultType;
+import ru.ssau.exception.EntityNotFoundException;
+import ru.ssau.mapper.SubjectResultTypeMapper;
+import ru.ssau.repository.SubjectResultTypeRepository;
+import ru.ssau.repository.PupilEducationRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class SubjectResultTypeService {
+public class SubjectResultTypeService implements BaseService<SubjectResultTypeDto, Long> {
+
     private final SubjectResultTypeRepository repository;
-    private final SubjectResultTypeMapper mapper;
     private final PupilEducationRepository educationRepository;
+    private final SubjectResultTypeMapper mapper;
 
+    @Override
     public List<SubjectResultTypeDto> findAll() {
-        return repository.findAll().stream().map(mapper::toDto).toList();
+        return mapper.toDtoList(repository.findAll());
     }
 
-    public SubjectResultTypeDto findById(Integer educationCode) {
-        return repository.findById(educationCode).map(mapper::toDto)
-                .orElseThrow(() -> new RuntimeException("SubjectResultType not found for education: " + educationCode));
+    @Override
+    public SubjectResultTypeDto findById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new EntityNotFoundException("Предметные результаты", id));
     }
 
+    @Override
     @Transactional
     public SubjectResultTypeDto create(SubjectResultTypeDto dto) {
         SubjectResultType entity = mapper.toEntity(dto);
-        entity.setEducation(educationRepository.getReferenceById(dto.getEducationCode()));
-        return mapper.toDto(repository.save(entity));
-    }
-
-    @Transactional
-    public SubjectResultTypeDto update(Integer educationCode, SubjectResultTypeDto dto) {
-        if (!repository.existsById(educationCode)) {
-            throw new RuntimeException("SubjectResultType not found for education: " + educationCode);
+        if (dto.getEducationId() != null) {
+            entity.setEducation(educationRepository.getReferenceById(dto.getEducationId()));
         }
-        SubjectResultType entity = mapper.toEntity(dto);
-        entity.setEducationCode(educationCode);
-        entity.setEducation(educationRepository.getReferenceById(educationCode));
         return mapper.toDto(repository.save(entity));
     }
 
+    @Override
     @Transactional
-    public void delete(Integer educationCode) {
-        repository.deleteById(educationCode);
+    public SubjectResultTypeDto update(Long id, SubjectResultTypeDto dto) {
+        SubjectResultType existing = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Предметные результаты", id));
+        mapper.updateEntity(dto, existing);
+        if (dto.getEducationId() != null) {
+            existing.setEducation(educationRepository.getReferenceById(dto.getEducationId()));
+        } else {
+            existing.setEducation(null);
+        }
+        return mapper.toDto(repository.save(existing));
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new EntityNotFoundException("Предметные результаты", id);
+        }
+        repository.deleteById(id);
     }
 }

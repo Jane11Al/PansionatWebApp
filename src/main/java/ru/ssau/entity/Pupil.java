@@ -1,21 +1,24 @@
 package ru.ssau.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import lombok.AllArgsConstructor;
 import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
 @Table(name = "\"Воспитанник\"")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Pupil {
+
     @Id
-    @Column(name = "\"Номер_личного_дела_воспитанника\"")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "\"Номер_личного_дела_воспитанника\"", unique = true, nullable = false)
     private Integer personalFileNumber;
 
     @Column(name = "\"ФИО\"")

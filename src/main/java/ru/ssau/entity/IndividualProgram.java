@@ -1,30 +1,26 @@
 package ru.ssau.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.Set;
+import lombok.AllArgsConstructor;
 
 @Entity
-@Table(name = "\"Индивидуальная_программа\"")
+@Table(name = "\"Индивидуальная_программа\"",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"\"Год_обучения\"", "\"Код_программы\""}))
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class IndividualProgram {
-    @EmbeddedId
-    private IndividualProgramId id;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "\"Год_обучения\"", nullable = false)
+    private Short year;
 
     @ManyToOne
-    @MapsId("programCode")
-    @JoinColumn(name = "\"Код_программы\"")
+    @JoinColumn(name = "\"Код_программы\"", referencedColumnName = "\"Код_программы\"")
     private Program program;
-
-    @OneToMany(mappedBy = "individualProgram")
-    private Set<PupilEducation> educations;
-
-    @OneToMany(mappedBy = "individualProgram")
-    private Set<Subject> subjects;
 }

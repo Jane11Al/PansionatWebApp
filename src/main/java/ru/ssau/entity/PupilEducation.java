@@ -1,40 +1,35 @@
 package ru.ssau.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Set;
+import lombok.AllArgsConstructor;
 
 @Entity
 @Table(name = "\"Обучение_воспитанника\"")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class PupilEducation {
+
     @Id
-    @Column(name = "\"Код_обучамого_в_определенном_году\"")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "\"Код_обучамого_в_определенном_году\"", unique = true, nullable = false)
     private Integer code;
 
     @ManyToOne
-    @JoinColumns({
-            @JoinColumn(name = "\"Год_обучения\"", referencedColumnName = "\"Год_обучения\""),
-            @JoinColumn(name = "\"Код_программы\"", referencedColumnName = "\"Код_программы\"")
-
-    })
+    @JoinColumn(name = "individual_program_id")
     private IndividualProgram individualProgram;
 
     @ManyToOne
-    @JoinColumn(name = "\"ФИО_педагога\"")
+    @JoinColumn(name = "\"ФИО_педагога\"", referencedColumnName = "\"ФИО_педагога\"")
     private Teacher teacher;
 
     @ManyToOne
-    @JoinColumn(name = "\"Номер_личного_дела_воспитанника\"")
+    @JoinColumn(name = "\"Номер_личного_дела_воспитанника\"", referencedColumnName = "\"Номер_личного_дела_воспитанника\"")
     private Pupil pupil;
-
-    @OneToMany(mappedBy = "education")
-    private Set<SubjectResult> subjectResults;
 
     @OneToOne(mappedBy = "education")
     private PersonalResultType personalResult;

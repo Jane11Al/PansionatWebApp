@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 @Data
 public class PupilDto {
+    private Long id;
     private Integer personalFileNumber;
     private String fullName;
     private LocalDate birthDate;

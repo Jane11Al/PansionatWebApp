@@ -1,48 +1,57 @@
 package ru.ssau.service;
 
-import ru.ssau.dto.*;
-import ru.ssau.entity.*;
-import ru.ssau.mapstruct.*;
-import ru.ssau.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.ssau.dto.GuardianDto;
+import ru.ssau.entity.Guardian;
+import ru.ssau.exception.EntityNotFoundException;
+import ru.ssau.mapper.GuardianMapper;
+import ru.ssau.repository.GuardianRepository;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class GuardianService {
+public class GuardianService implements BaseService<GuardianDto, Long> {
+
     private final GuardianRepository repository;
     private final GuardianMapper mapper;
 
+    @Override
     public List<GuardianDto> findAll() {
-        return repository.findAll().stream().map(mapper::toDto).toList();
+        return mapper.toDtoList(repository.findAll());
     }
 
-    public GuardianDto findById(String fullName) {
-        return repository.findById(fullName).map(mapper::toDto)
-                .orElseThrow(() -> new RuntimeException("Guardian not found: " + fullName));
+    @Override
+    public GuardianDto findById(Long id) {
+        return repository.findById(id)
+                .map(mapper::toDto)
+                .orElseThrow(() -> new EntityNotFoundException("Опекун", id));
     }
 
+    @Override
     @Transactional
     public GuardianDto create(GuardianDto dto) {
         Guardian entity = mapper.toEntity(dto);
         return mapper.toDto(repository.save(entity));
     }
 
+    @Override
     @Transactional
-    public GuardianDto update(String fullName, GuardianDto dto) {
-        if (!repository.existsById(fullName)) {
-            throw new RuntimeException("Guardian not found: " + fullName);
-        }
-        Guardian entity = mapper.toEntity(dto);
-        entity.setFullName(fullName);
-        return mapper.toDto(repository.save(entity));
+    public GuardianDto update(Long id, GuardianDto dto) {
+        Guardian existing = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Опекун", id));
+        mapper.updateEntity(dto, existing);
+        return mapper.toDto(repository.save(existing));
     }
 
+    @Override
     @Transactional
-    public void delete(String fullName) {
-        repository.deleteById(fullName);
+    public void delete(Long id) {
+        if (!repository.existsById(id)) {
+            throw new EntityNotFoundException("Опекун", id);
+        }
+        repository.deleteById(id);
     }
 }

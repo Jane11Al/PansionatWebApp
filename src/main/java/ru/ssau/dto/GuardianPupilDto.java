@@ -4,7 +4,10 @@ import lombok.Data;
 
 @Data
 public class GuardianPupilDto {
+    private Long id;
+    private Long guardianId;
     private String guardianFullName;
-    private Integer personalFileNumber;
+    private Long pupilId;
+    private Integer pupilPersonalFileNumber;
     private String pupilFullName;
 }
